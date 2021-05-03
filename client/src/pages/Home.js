@@ -1,8 +1,10 @@
 import React from "react";
 //Allows us to make requests to the Graphql server.
 import { useQuery } from "@apollo/react-hooks";
-import { QUERY_THOUGHTS } from "../utils/queries";
+import { QUERY_THOUGHTS, QUERY_ME_BASIC } from "../utils/queries";
+import Auth from "../utils/auth";
 
+import FriendList from "../components/FriendsList";
 import ThoughtList from "../components/ThoughtList";
 
 const Home = () => {
@@ -10,12 +12,13 @@ const Home = () => {
   // Runs on page load and returns data from QUERY_THOUGHTS
   const { loading, data } = useQuery(QUERY_THOUGHTS);
   const thoughts = data?.thoughts || [];
-  console.log(thoughts);
+  const { data: userData } = useQuery(QUERY_ME_BASIC);
 
+  const loggedIn = Auth.loggedIn();
   return (
     <main>
       <div className="flex-row justify-space-between">
-        <div className="col-12 mb-3">
+        <div className={`col-12 mb-3 ${loggedIn && "col-lg-8"}`}>
           {loading ? (
             <div>Loading...</div>
           ) : (
@@ -25,6 +28,15 @@ const Home = () => {
             />
           )}
         </div>
+        {loggedIn && userData ? (
+          <div className="col-12 col-lg-3 mb-3">
+            <FriendList
+              username={userData.me.username}
+              friendCount={userData.me.friendCount}
+              friends={userData.me.friends}
+            />
+          </div>
+        ) : null}
       </div>
     </main>
   );
